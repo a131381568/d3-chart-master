@@ -2,7 +2,31 @@
   <div class="card">
     <h2 class="card-title">{{ chartTitle }}</h2>
     <h4 class="card-description">{{ chartDescription }}</h4>
-    <div class="svgboard-container"></div>
+    <div class="svgboard-container">
+      <svg
+        id="svgboard"
+        viewBox="0 0 200 200"
+        preserveAspectRatio="xMinYMin meet"
+        width="100%"
+        height="200"
+      >
+        <foreignObject v-show="maxY > 23" x="0" y="0" width="60" height="30">
+          <div class="scale-bar-text">{{ outPutMaxVal }}</div>
+        </foreignObject>
+        <foreignObject x="0" :y="horizontalY - 10" width="60" height="30">
+          <div class="scale-bar-text">0</div>
+        </foreignObject>
+        <foreignObject
+          v-show="minY > 22"
+          x="0"
+          :y="height - 18"
+          width="60"
+          height="30"
+        >
+          <div class="scale-bar-text">{{ outPutMinVal }}</div>
+        </foreignObject>
+      </svg>
+    </div>
   </div>
 </template>
 <script setup lang="ts">
@@ -13,18 +37,23 @@ const dataSet = ref<chartInfoList>([]);
 const chartTitle = ref("");
 const chartDescription = ref("");
 const width = ref(125); // 畫布寬度
-const height = ref(400); // 畫布高度
+const height = ref(200); // 畫布高度
 const maxNegative = ref(0); // 最小負數
 const padding = 20;
 const rectStep = 90; // 長條圖的間距
 const rectWidth = 35; // 長條圖的寬度
 const rectRadius = 4; // 長條圖的圓角
-const maxValue = ref(300); // 最大正數
-const disPlayH = 500;
-const scaleVar = ref(1);
+const maxValue = ref(200); // 最大正數
+const disPlayH = 200;
+const totalH = ref(500);
+const leftScaleBar = 90;
+const horizontalY = ref(0);
+const maxY = ref(0);
+const minY = ref(10);
 
 // 取得資料
 const getData = () => {
+  // 假資料
   const demoData: chartData = {
     title: "Maecenas elit quam",
     description:
@@ -32,45 +61,90 @@ const getData = () => {
     info: [
       {
         type: "benefit",
-        value: 800,
+        value: 2705370,
       },
       {
         type: "cost",
-        value: 210,
+        value: 2168010,
       },
       {
         type: "loss",
-        value: -80,
+        value: -439100,
       },
     ],
   };
+  // 輸入資料
   chartTitle.value = demoData.title;
   chartDescription.value = demoData.description;
   dataSet.value = demoData.info;
   const flatArr = demoData.info.map((item) => item.value);
+  // 取得最大最小值
   maxValue.value = Math.max(...flatArr);
   maxNegative.value = Math.min(...flatArr);
   // 正負最大高度總合
-  // const totalH = maxValue.value + Math.abs(maxNegative.value);
-  height.value = maxValue.value + Math.abs(maxNegative.value);
-  // height.value = disPlayH;
-  // 修正比例
-  // scaleVar.value = disPlayH / totalH;
+  totalH.value = maxValue.value + Math.abs(maxNegative.value);
+  height.value = disPlayH;
   width.value = (demoData.info.length - 1) * rectStep + rectStep - rectWidth;
+  // 取得水平線 Y
+  horizontalY.value =
+    height.value - height.value * (Math.abs(maxNegative.value) / totalH.value);
 };
+
+// 計算刻度函式
+const scaleOutPutVal = (val: number) => {
+  if (val > 1000000000000 || val < -1000000000000) {
+    // 兆
+    const kNum = (val / 1000000000000).toFixed(0);
+    return String(kNum) + "T";
+  } else if (val > 1000000000 || val < -1000000000) {
+    // 十億
+    const kNum = (val / 1000000000).toFixed(0);
+    return String(kNum) + "B";
+  } else if (val > 1000000 || val < -1000000) {
+    // 百萬
+    const kNum = (val / 1000000).toFixed(0);
+    return String(kNum) + "M";
+  } else if (val > 100 || val < -100) {
+    // 百, 千, 萬, 十萬
+    let kNum = (val / 1000).toFixed(1);
+    const toArr = String(kNum).split(".");
+    if (toArr[toArr.length - 1] === "0") {
+      kNum = (val / 1000).toFixed(0);
+    }
+    return String(kNum) + "K";
+  } else if (val <= 100 || val >= -100) {
+    // 十位
+    return val;
+  } else {
+    // 兆
+    const kNum = (val / 1000000000000).toFixed(0);
+    return String(kNum) + "T";
+  }
+};
+
+// 刻度最大值
+const outPutMaxVal = computed(() => {
+  return scaleOutPutVal(maxValue.value);
+});
+
+// 刻度最小值
+const outPutMinVal = computed(() => {
+  return scaleOutPutVal(maxNegative.value);
+});
 
 onMounted(() => {
   getData();
 
   // 設置畫板
-  // .attr("preserveAspectRatio", "xMinYMin slice")
-  const svgboard = d3
-    .select(".svgboard-container")
-    .append("svg")
-    .attr("id", "svgboard")
-    .attr("width", width.value)
-    .attr("height", height.value)
-    .append("g");
+  const svgboard = d3.select("#svgboard").append("g");
+  // .append("svg")
+  // .attr("id", "svgboard")
+  // .attr("viewBox", "0 0 200 200")
+  // .attr("preserveAspectRatio", "xMinYMin meet")
+  // .attr("width", "100%") //  width.value
+  // .attr("height", height.value)
+  //
+  // .attr("transform", "translate(0,80)");
 
   // 繪製長條圖
   dataSet.value.forEach((item, index) => {
@@ -81,14 +155,12 @@ onMounted(() => {
   });
 
   function drawRect(order, val) {
-    // val = val * scaleVar.value;
     const w = rectWidth;
     // 使用 maxValue 作為畫面高度 100% 計算該筆資料佔畫面的百分比
-    let h = maxValue.value * (val / height.value);
-    // let h = val * scaleVar.value;
-    let x = (order + 1) * rectStep - w;
+    let h = height.value * (val / totalH.value);
+    let x = (order + 1) * rectStep - w + leftScaleBar;
     // 畫面高度 - 長條圖高度 = 繪製長條圖的起點
-    let y = height.value - Math.abs(maxNegative.value) - h - padding;
+    let y = horizontalY.value - h;
 
     const r = rectRadius;
     let tl = rectRadius;
@@ -101,10 +173,18 @@ onMounted(() => {
       tr = 0;
       bl = rectRadius;
       br = rectRadius;
-      h = maxValue.value * (Math.abs(val) / height.value);
-      // h = Math.abs(val) * scaleVar.value;
-      y = height.value - Math.abs(val) - padding;
-      x = (0 + 1) * rectStep - w;
+      h = height.value * (Math.abs(val) / totalH.value);
+      y = height.value - height.value * (Math.abs(val) / totalH.value);
+      x = (0 + 1) * rectStep - w + leftScaleBar;
+      // 儲存最小的顯示高度
+      if (h > minY.value) {
+        minY.value = h;
+      }
+    } else {
+      // 儲存最大的顯示高度
+      if (h > maxY.value) {
+        maxY.value = h;
+      }
     }
 
     let retval;
@@ -145,10 +225,19 @@ onMounted(() => {
   const drawLine = svgboard.append("line");
   drawLine.attr("stroke-width", 1);
   drawLine.attr("stroke", "#ccc");
-  drawLine.attr("x1", 0);
-  drawLine.attr("y1", height.value - padding - Math.abs(maxNegative.value));
-  drawLine.attr("x2", width.value);
-  drawLine.attr("y2", height.value - padding - Math.abs(maxNegative.value));
+  drawLine.attr("x1", 0 + +leftScaleBar);
+  drawLine.attr("y1", horizontalY.value);
+  drawLine.attr("x2", width.value + leftScaleBar);
+  drawLine.attr("y2", horizontalY.value);
+
+  // 繪製刻度文字
+  // const scaleBarText = svgboard
+  //   .append("text")
+  //   .attr("class", "scale-bar-text")
+  //   .attr("text-anchor", "middle")
+  //   .attr("x", leftScaleBar)
+  //   .attr("y", 13)
+  //   .text("12345678910");
 
   // 加上數字
   // const text = svgboard
@@ -173,6 +262,9 @@ onMounted(() => {
 });
 </script>
 <style>
+.card {
+  width: 30%;
+}
 .benefit {
   fill: #1977ff;
 }
@@ -181,5 +273,21 @@ onMounted(() => {
 }
 .cost {
   fill: #fa8903;
+}
+.svgboard-container {
+  /* resize: horizontal; */
+  overflow: visible;
+  width: 100%;
+  height: auto;
+  margin: 0 auto;
+}
+#svgboard {
+  overflow: visible;
+}
+.scale-bar-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: right;
 }
 </style>
