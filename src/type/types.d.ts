@@ -6,5 +6,7 @@ export type chartInfoList = {
 export interface chartData {
   title: string;
   description: string;
-  info: chartInfoList;
+  benefitVal: number;
+  costVal: number;
+  lossVal: number;
 }
