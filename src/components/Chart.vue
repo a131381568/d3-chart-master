@@ -5,39 +5,41 @@
     <div class="svgboard-container">
       <svg
         id="svgboard"
-        viewBox="0 0 200 200"
+        viewBox="0 0 325 325"
         preserveAspectRatio="xMinYMin meet"
         width="100%"
-        height="200"
+        height="325"
       >
         <!-- 提示話框 -->
         <foreignObject
           v-show="benefitTipState || chartIsFreeze === 'benefit'"
           :class="['top-tip-text-box', { 'tip-is-ellipsis': tipIsEllipsis }]"
-          :x="chartX1"
+          :x="1 * rectStep + 7 + rectWidth / 2 - 115"
           y="-48"
         >
-          <div class="top-tip-text">
+          <div class="top-tip-text benefit-top-tip-text">
             已實現獲利 ${{ separator(benefitValue) }}
           </div>
         </foreignObject>
         <foreignObject
           v-show="lossTipState || chartIsFreeze === 'loss'"
           :class="['top-tip-text-box', { 'tip-is-ellipsis': tipIsEllipsis }]"
-          :x="chartX1"
+          :x="1 * rectStep + 7 + rectWidth / 2 - 115"
           y="-48"
         >
-          <div class="top-tip-text">
+          <div class="top-tip-text loss-top-tip-text">
             已實現虧損 ${{ separator(maxNegative) }}
           </div>
         </foreignObject>
         <foreignObject
           v-show="costTipState || chartIsFreeze === 'cost'"
           :class="['top-tip-text-box', { 'tip-is-ellipsis': tipIsEllipsis }]"
-          :x="chartX2"
+          :x="2 * rectStep + 7 + rectWidth / 2 - 115"
           y="-48"
         >
-          <div class="top-tip-text">總交易成本 ${{ separator(costValue) }}</div>
+          <div class="top-tip-text cost-top-tip-text">
+            總交易成本 ${{ separator(costValue) }}
+          </div>
         </foreignObject>
         <!-- 刻度 -->
         <foreignObject
@@ -109,17 +111,17 @@
         <line
           v-show="benefitTipState || chartIsFreeze === 'benefit'"
           class="benefit-line tip-line"
-          :x1="2 * leftScaleBar - rectWidth + rectWidth / 2"
+          :x1="2 * rectStep - rectWidth + rectWidth / 2"
           y1="-16"
-          :x2="2 * leftScaleBar - rectWidth + rectWidth / 2"
+          :x2="2 * rectStep - rectWidth + rectWidth / 2"
           y2="0"
         />
         <line
           v-show="costTipState || chartIsFreeze === 'cost'"
           class="cost-line tip-line"
-          :x1="3 * leftScaleBar - rectWidth + rectWidth / 2"
+          :x1="3 * rectStep - rectWidth + rectWidth / 2"
           y1="-16"
-          :x2="3 * leftScaleBar - rectWidth + rectWidth / 2"
+          :x2="3 * rectStep - rectWidth + rectWidth / 2"
           :y2="
             height -
             height * (costValue / totalH) +
@@ -129,9 +131,9 @@
         <line
           v-show="lossTipState || chartIsFreeze === 'loss'"
           class="loss-line tip-line"
-          :x1="2 * leftScaleBar - rectWidth + rectWidth / 2"
+          :x1="2 * rectStep - rectWidth + rectWidth / 2"
           y1="-16"
-          :x2="2 * leftScaleBar - rectWidth + rectWidth / 2"
+          :x2="2 * rectStep - rectWidth + rectWidth / 2"
           :y2="height * (benefitValue / totalH)"
         />
       </svg>
@@ -157,26 +159,58 @@ const disPlayH = 200;
 const totalH = ref(500);
 const leftScaleBar = 90;
 const horizontalY = ref(0);
+
+const benefitTipX = ref(0);
+const costTipX = ref(0);
+const lossTipX = ref(0);
+
 const maxY = ref(0);
 const minY = ref(10);
-const chartX1 = ref(1 * leftScaleBar - rectWidth);
-const chartX2 = ref(2 * leftScaleBar - rectWidth);
 const benefitTipState = ref(false);
 const costTipState = ref(false);
 const lossTipState = ref(false);
-const benefitTipClickState = ref(false);
-const costTipClickState = ref(false);
-const lossTipClickState = ref(false);
 const tipIsEllipsis = ref(false);
 const chartIsFreeze = ref("");
+
+// 取得當下資訊框端度
+const getTipWidth = (chartType: string) => {
+  const benefitDOM = document.querySelector(
+    ".benefit-top-tip-text"
+  ) as HTMLElement | null;
+  const costDOM = document.querySelector(
+    ".cost-top-tip-text"
+  ) as HTMLElement | null;
+  const lossDOM = document.querySelector(
+    ".loss-top-tip-text"
+  ) as HTMLElement | null;
+  switch (chartType) {
+    case "benefit":
+      if (benefitDOM !== null) {
+        benefitTipX.value = benefitDOM.offsetWidth;
+      }
+      break;
+    case "cost":
+      if (costDOM !== null) {
+        costTipX.value = costDOM.offsetWidth;
+      }
+      break;
+    case "loss":
+      if (lossDOM !== null) {
+        lossTipX.value = lossDOM.offsetWidth;
+      }
+      break;
+    default:
+      break;
+  }
+};
 
 // 取得資料
 const getData = () => {
   // 假資料
   const demoData: chartData = {
-    title: "Maecenas elit quam",
+    title: "Phasellus sit amet",
     description:
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum id nisi placerat, placerat dui dictum.",
+      "Lorem ipsum dolor sit amet, curabitur adipiscing elit. Etiam sagittis porttitor nec vehicula.",
     benefitVal: 9705370000000000,
     costVal: 1168010000000000,
     lossVal: -3391000000000000,
@@ -364,6 +398,7 @@ const toggleTip = (chartType: string) => {
 
 // 顯示資訊框
 const showTip = (chartType: string) => {
+  // 顯示
   chartIsFreeze.value = "";
   benefitTipState.value = false;
   costTipState.value = false;
@@ -390,6 +425,8 @@ const showTip = (chartType: string) => {
     default:
       break;
   }
+  // 取得寬度
+  getTipWidth(chartType);
 };
 
 // 隱藏資訊框
@@ -439,7 +476,24 @@ onMounted(() => {
 </script>
 <style>
 .card {
-  width: 30%;
+  width: auto;
+  max-width: 325px;
+  margin: 0 auto;
+  border: 1px solid #e7eaf2;
+  padding: 20px;
+  border-radius: 10px;
+}
+.card-title {
+  text-align: left;
+  color: #444;
+  font-size: 18px;
+  margin: 0;
+}
+.card-description {
+  text-align: left;
+  color: #919eaa;
+  font-size: 14px;
+  margin: 5px 0 0 0;
 }
 .benefit {
   fill: #1977ff;
@@ -456,7 +510,7 @@ onMounted(() => {
   width: 100%;
   height: auto;
   margin: 0 auto;
-  margin-top: 75px;
+  margin-top: 50px;
 }
 #svgboard {
   overflow: visible;
@@ -473,6 +527,7 @@ onMounted(() => {
 }
 .top-tip-text-box {
   width: calc(100% + 40px);
+  width: 100%;
   height: 32px;
 }
 
