@@ -8,7 +8,7 @@ DEMO 網址: https://dev.puraliena.com/
 
 可以 Hover 顯示狀態，又可以 Click 凍結狀態，有先後順序的情況下，所以會延伸`第4點`的情況。
 
-1. Default 顯示
+1. Default 顯示<br>
   ![01-default](https://raw.githubusercontent.com/a131381568/d3-chart-master/main/doc/01-default.png)
     + 資料結構為
       ```javascript
@@ -21,11 +21,11 @@ DEMO 網址: https://dev.puraliena.com/
       }
         ```
 
-2. 長條圖 Hover 顯示
+2. 長條圖 Hover 顯示<br>
   ![02-hover](https://raw.githubusercontent.com/a131381568/d3-chart-master/main/doc/02-hover.gif)
-3. 長條圖 Click 顯示
+3. 長條圖 Click 顯示<br>
   ![03-click](https://raw.githubusercontent.com/a131381568/d3-chart-master/main/doc/03-click.gif)
-4. 長條圖 Click 後, 去 Hover 其它長條圖
+4. 長條圖 Click 後, 去 Hover 其它長條圖<br>
   ![04-hover-after-click](https://raw.githubusercontent.com/a131381568/d3-chart-master/main/doc/04-hover-after-click.gif)
 
 ## 二、數值問題
@@ -35,10 +35,10 @@ DEMO 網址: https://dev.puraliena.com/
 - `benefitVal = 270537`
 - `costVal = 216801`
 - `lossVal = -791`
-- 實際顯示 :
+- 實際顯示 :<br>
 ![Mock-Data](https://raw.githubusercontent.com/a131381568/d3-chart-master/main/doc/10-mock-data.png)
   > 1.原本的-791會因為跟其他數值差異太大，導致比例壓到幾乎看不到。<br>2.因為長度過短，甚至幾乎沒有，會導致左邊的刻度很尷尬，所以設計成，長度過小或快要撞到，就會讓刻度消失。<br>3.左邊的 270.5K 是否要自動進位成 271K 的問題，因為考慮到下方負數也要統一標準，所以就沒有讓它自動進位了。
-- 原設計稿比對 :
+- 原設計稿比對 :<br>
 ![Mockup](https://raw.githubusercontent.com/a131381568/d3-chart-master/main/doc/11-mock-up.png)
 
 
@@ -46,7 +46,7 @@ DEMO 網址: https://dev.puraliena.com/
 數值之間比例不要差距過大，才能夠三個長條圖都能正常顯示。
 + `benefitVal = 270537`
 + `costVal = 216801`
-+ `lossVal = -33910`
++ `lossVal = -33910`<br>
 ![01-default](https://raw.githubusercontent.com/a131381568/d3-chart-master/main/doc/01-default.png)
 
 ### C. 刻度單位
@@ -64,14 +64,14 @@ DEMO 網址: https://dev.puraliena.com/
 - 最大值
   + `benefitVal = 9705370000000000`
   + `costVal = 1168010000000000`
-  + `lossVal = -3391000000000000`
+  + `lossVal = -3391000000000000`<br>
 ![05-int-max](https://raw.githubusercontent.com/a131381568/d3-chart-master/main/doc/05-int-max.png)<br>
     > 萬兆為顯示的最大值
 
 - 超過最大值, 產生省略
   + `benefitVal = 170537000000000000`
   + `costVal = 1168010000000000`
-  + `lossVal = -339100000000000`
+  + `lossVal = -339100000000000`<br>
 ![06-int-max-ellipsis](https://raw.githubusercontent.com/a131381568/d3-chart-master/main/doc/06-int-max-ellipsis.png)<br>
     > 十萬兆開始會有省略號
 
@@ -79,7 +79,7 @@ DEMO 網址: https://dev.puraliena.com/
 - 最小值
   + `benefitVal = 1`
   + `costVal = 10`
-  + `lossVal = -3391000000000000`
+  + `lossVal = -3391000000000000`<br>
 ![07-1-int-min](https://raw.githubusercontent.com/a131381568/d3-chart-master/main/doc/07-1-int-min.png)<br>![07-2-int-min](https://raw.githubusercontent.com/a131381568/d3-chart-master/main/doc/07-2-int-min.png)<br>![07-3-int-min](https://raw.githubusercontent.com/a131381568/d3-chart-master/main/doc/07-3-int-min.png)<br>
     > 比例小到一種程度就不會顯示刻度, 但可以藉由`點擊下方標籤`顯示資訊
 
@@ -87,14 +87,14 @@ DEMO 網址: https://dev.puraliena.com/
 - 最大值
   + `benefitVal = 3705370000000000`
   + `costVal = 1168010000000000`
-  + `lossVal = -9391000000000000`
+  + `lossVal = -9391000000000000`<br>
 ![08-1-negative-int-max](https://raw.githubusercontent.com/a131381568/d3-chart-master/main/doc/08-2-negative-int-max-ellipsis.png)<br>
     > 負萬兆為顯示的最大值
 
 - 超過最大值, 產生省略
   + `benefitVal = 37053700000000000`
   + `costVal = 11680100000000000`
-  + `lossVal = -939100000000000000`
+  + `lossVal = -939100000000000000`<br>
 ![08-2-negative-int-max-ellipsis](https://raw.githubusercontent.com/a131381568/d3-chart-master/main/doc/08-1-negative-int-max.png)<br>
     > 負十萬兆開始會有省略號
 
@@ -102,7 +102,7 @@ DEMO 網址: https://dev.puraliena.com/
 - 最小值
   + `benefitVal = 3705370000000000`
   + `costVal = 1168010000000000`
-  + `lossVal = -1`
+  + `lossVal = -1`<br>
 ![09-negative-int-min](https://raw.githubusercontent.com/a131381568/d3-chart-master/main/doc/09-negative-int-min.png)<br>
     > 比例小到一種程度就不會顯示刻度, 但可以藉由`點擊下方標籤`顯示資訊
 
