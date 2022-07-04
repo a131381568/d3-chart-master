@@ -5,16 +5,19 @@
     <div class="svgboard-container">
       <svg
         id="svgboard"
-        viewBox="0 0 325 325"
+        viewBox="0 0 325 200"
         preserveAspectRatio="xMinYMin meet"
         width="100%"
-        height="325"
+        height="200"
       >
         <!-- 提示話框 -->
         <foreignObject
-          v-show="benefitTipState || chartIsFreeze === 'benefit'"
-          :class="['top-tip-text-box', { 'tip-is-ellipsis': tipIsEllipsis }]"
-          :x="1 * rectStep + 7 + rectWidth / 2 - 115"
+          :class="[
+            'top-tip-text-box',
+            { 'tip-is-ellipsis': tipIsEllipsis },
+            { 'hide-item': benefitTipState || chartIsFreeze === 'benefit' },
+          ]"
+          x="0"
           y="-48"
         >
           <div class="top-tip-text benefit-top-tip-text">
@@ -22,9 +25,12 @@
           </div>
         </foreignObject>
         <foreignObject
-          v-show="lossTipState || chartIsFreeze === 'loss'"
-          :class="['top-tip-text-box', { 'tip-is-ellipsis': tipIsEllipsis }]"
-          :x="1 * rectStep + 7 + rectWidth / 2 - 115"
+          :class="[
+            'top-tip-text-box',
+            { 'tip-is-ellipsis': tipIsEllipsis },
+            { 'hide-item': lossTipState || chartIsFreeze === 'loss' },
+          ]"
+          x="0"
           y="-48"
         >
           <div class="top-tip-text loss-top-tip-text">
@@ -32,9 +38,12 @@
           </div>
         </foreignObject>
         <foreignObject
-          v-show="costTipState || chartIsFreeze === 'cost'"
-          :class="['top-tip-text-box', { 'tip-is-ellipsis': tipIsEllipsis }]"
-          :x="2 * rectStep + 7 + rectWidth / 2 - 115"
+          :class="[
+            'top-tip-text-box',
+            { 'tip-is-ellipsis': tipIsEllipsis },
+            { 'hide-item': costTipState || chartIsFreeze === 'cost' },
+          ]"
+          :x="1 * rectStep"
           y="-48"
         >
           <div class="top-tip-text cost-top-tip-text">
@@ -136,7 +145,19 @@
           :x2="2 * rectStep - rectWidth + rectWidth / 2"
           :y2="height * (benefitValue / totalH)"
         />
+        <!-- 標籤名稱 -->
       </svg>
+      <div class="tag-list">
+        <div class="tag-name" @click.prevent="toggleTip('benefit')">
+          <span class="benefit-tag"></span>&nbsp;&nbsp;已實現獲利
+        </div>
+        <div class="tag-name" @click.prevent="toggleTip('loss')">
+          <span class="loss-tag"></span>&nbsp;&nbsp;已實現虧損
+        </div>
+        <div class="tag-name" @click.prevent="toggleTip('cost')">
+          <span class="cost-tag"></span>&nbsp;&nbsp;總交易成本
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -159,11 +180,9 @@ const disPlayH = 200;
 const totalH = ref(500);
 const leftScaleBar = 90;
 const horizontalY = ref(0);
-
 const benefitTipX = ref(0);
 const costTipX = ref(0);
 const lossTipX = ref(0);
-
 const maxY = ref(0);
 const minY = ref(10);
 const benefitTipState = ref(false);
@@ -173,35 +192,27 @@ const tipIsEllipsis = ref(false);
 const chartIsFreeze = ref("");
 
 // 取得當下資訊框端度
-const getTipWidth = (chartType: string) => {
-  const benefitDOM = document.querySelector(
-    ".benefit-top-tip-text"
-  ) as HTMLElement | null;
-  const costDOM = document.querySelector(
-    ".cost-top-tip-text"
-  ) as HTMLElement | null;
-  const lossDOM = document.querySelector(
-    ".loss-top-tip-text"
-  ) as HTMLElement | null;
-  switch (chartType) {
-    case "benefit":
-      if (benefitDOM !== null) {
-        benefitTipX.value = benefitDOM.offsetWidth;
-      }
-      break;
-    case "cost":
-      if (costDOM !== null) {
-        costTipX.value = costDOM.offsetWidth;
-      }
-      break;
-    case "loss":
-      if (lossDOM !== null) {
-        lossTipX.value = lossDOM.offsetWidth;
-      }
-      break;
-    default:
-      break;
-  }
+const getTipWidth = () => {
+  setTimeout(() => {
+    const benefitDOM = document.querySelector(
+      ".benefit-top-tip-text"
+    ) as HTMLElement | null;
+    const costDOM = document.querySelector(
+      ".cost-top-tip-text"
+    ) as HTMLElement | null;
+    const lossDOM = document.querySelector(
+      ".loss-top-tip-text"
+    ) as HTMLElement | null;
+    if (benefitDOM !== null) {
+      benefitTipX.value = benefitDOM.offsetWidth;
+    }
+    if (costDOM !== null) {
+      costTipX.value = costDOM.offsetWidth;
+    }
+    if (lossDOM !== null) {
+      lossTipX.value = lossDOM.offsetWidth;
+    }
+  }, 500);
 };
 
 // 取得資料
@@ -211,9 +222,9 @@ const getData = () => {
     title: "Phasellus sit amet",
     description:
       "Lorem ipsum dolor sit amet, curabitur adipiscing elit. Etiam sagittis porttitor nec vehicula.",
-    benefitVal: 9705370000000000,
-    costVal: 1168010000000000,
-    lossVal: -3391000000000000,
+    benefitVal: 37053700000000000,
+    costVal: 11680100000000000,
+    lossVal: -1,
   };
   // 輸入資料
   chartTitle.value = demoData.title;
@@ -425,8 +436,6 @@ const showTip = (chartType: string) => {
     default:
       break;
   }
-  // 取得寬度
-  getTipWidth(chartType);
 };
 
 // 隱藏資訊框
@@ -472,6 +481,9 @@ onMounted(() => {
     .attr("y1", horizontalY.value)
     .attr("x2", width.value + leftScaleBar)
     .attr("y2", horizontalY.value);
+
+  // 取得各資訊欄寬度
+  // getTipWidth();
 });
 </script>
 <style>
@@ -515,6 +527,9 @@ onMounted(() => {
 #svgboard {
   overflow: visible;
 }
+#svgboard g > path {
+  cursor: pointer;
+}
 .scale-bar-text {
   overflow: hidden;
   text-overflow: ellipsis;
@@ -526,7 +541,7 @@ onMounted(() => {
   height: 30px;
 }
 .top-tip-text-box {
-  width: calc(100% + 40px);
+  /* width: calc(100% + 40px); */
   width: 100%;
   height: 32px;
 }
@@ -565,5 +580,42 @@ onMounted(() => {
 }
 .loss.chart-freeze {
   fill: #bdbcec;
+}
+.top-tip-text-box.hide-item {
+  opacity: 1;
+}
+.top-tip-text-box {
+  opacity: 0;
+}
+.tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  margin: 30px 0 10px 0;
+  justify-content: center;
+}
+.tag-name {
+  width: 160px;
+  font-size: 14px;
+  margin: 5px 0;
+  color: #444;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+}
+.benefit-tag,
+.loss-tag,
+.cost-tag {
+  width: 15px;
+  height: 15px;
+}
+.benefit-tag {
+  background: #1977ff;
+}
+.cost-tag {
+  background: #fa8903;
+}
+.loss-tag {
+  background: #231fc0;
 }
 </style>
