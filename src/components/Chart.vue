@@ -12,7 +12,7 @@
       >
         <!-- 提示話框 -->
         <foreignObject
-          v-show="benefitTipState"
+          v-show="benefitTipState || chartIsFreeze === 'benefit'"
           :class="['top-tip-text-box', { 'tip-is-ellipsis': tipIsEllipsis }]"
           :x="chartX1"
           y="-48"
@@ -22,7 +22,7 @@
           </div>
         </foreignObject>
         <foreignObject
-          v-show="lossTipState"
+          v-show="lossTipState || chartIsFreeze === 'loss'"
           :class="['top-tip-text-box', { 'tip-is-ellipsis': tipIsEllipsis }]"
           :x="chartX1"
           y="-48"
@@ -32,7 +32,7 @@
           </div>
         </foreignObject>
         <foreignObject
-          v-show="costTipState"
+          v-show="costTipState || chartIsFreeze === 'cost'"
           :class="['top-tip-text-box', { 'tip-is-ellipsis': tipIsEllipsis }]"
           :x="chartX2"
           y="-48"
@@ -64,32 +64,50 @@
           <path
             :class="[
               'benefit',
-              { 'chart-active': benefitTipState },
-              { 'chart-freeze': costTipState || lossTipState },
+              {
+                'chart-freeze':
+                  costTipState ||
+                  lossTipState ||
+                  (chartIsFreeze !== 'benefit' && chartIsFreeze.length > 0),
+              },
             ]"
             @click.prevent="toggleTip('benefit')"
+            @mouseover.prevent="showTip('benefit')"
+            @mouseleave.prevent="hideTip('benefit')"
           ></path>
           <path
             :class="[
               'cost',
-              { 'chart-active': costTipState },
-              { 'chart-freeze': benefitTipState || lossTipState },
+              {
+                'chart-freeze':
+                  benefitTipState ||
+                  lossTipState ||
+                  (chartIsFreeze !== 'cost' && chartIsFreeze.length > 0),
+              },
             ]"
             @click.prevent="toggleTip('cost')"
+            @mouseover.prevent="showTip('cost')"
+            @mouseleave.prevent="hideTip('cost')"
           ></path>
           <path
             :class="[
               'loss',
-              { 'chart-active': lossTipState },
-              { 'chart-freeze': benefitTipState || costTipState },
+              {
+                'chart-freeze':
+                  benefitTipState ||
+                  costTipState ||
+                  (chartIsFreeze !== 'loss' && chartIsFreeze.length > 0),
+              },
             ]"
             @click.prevent="toggleTip('loss')"
+            @mouseover.prevent="showTip('loss')"
+            @mouseleave.prevent="hideTip('loss')"
           ></path>
           <line class="horizontal-line"></line>
         </g>
         <!-- 虛線 -->
         <line
-          v-show="benefitTipState"
+          v-show="benefitTipState || chartIsFreeze === 'benefit'"
           class="benefit-line tip-line"
           :x1="2 * leftScaleBar - rectWidth + rectWidth / 2"
           y1="-16"
@@ -97,7 +115,7 @@
           y2="0"
         />
         <line
-          v-show="costTipState"
+          v-show="costTipState || chartIsFreeze === 'cost'"
           class="cost-line tip-line"
           :x1="3 * leftScaleBar - rectWidth + rectWidth / 2"
           y1="-16"
@@ -109,7 +127,7 @@
           "
         />
         <line
-          v-show="lossTipState"
+          v-show="lossTipState || chartIsFreeze === 'loss'"
           class="loss-line tip-line"
           :x1="2 * leftScaleBar - rectWidth + rectWidth / 2"
           y1="-16"
@@ -146,7 +164,11 @@ const chartX2 = ref(2 * leftScaleBar - rectWidth);
 const benefitTipState = ref(false);
 const costTipState = ref(false);
 const lossTipState = ref(false);
+const benefitTipClickState = ref(false);
+const costTipClickState = ref(false);
+const lossTipClickState = ref(false);
 const tipIsEllipsis = ref(false);
+const chartIsFreeze = ref("");
 
 // 取得資料
 const getData = () => {
@@ -155,9 +177,9 @@ const getData = () => {
     title: "Maecenas elit quam",
     description:
       "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum id nisi placerat, placerat dui dictum.",
-    benefitVal: 270537,
-    costVal: 216801,
-    lossVal: -33910,
+    benefitVal: 9705370000000000,
+    costVal: 1168010000000000,
+    lossVal: -3391000000000000,
   };
   // 輸入資料
   chartTitle.value = demoData.title;
@@ -320,65 +342,72 @@ const drawRect = (chartType: string, val: number) => {
 
 // 切換顯示資訊框
 const toggleTip = (chartType: string) => {
+  if (chartIsFreeze.value === chartType) {
+    chartIsFreeze.value = "";
+    hideTip(chartType);
+  } else {
+    switch (chartType) {
+      case "benefit":
+        chartIsFreeze.value = "benefit";
+        break;
+      case "cost":
+        chartIsFreeze.value = "cost";
+        break;
+      case "loss":
+        chartIsFreeze.value = "loss";
+        break;
+      default:
+        break;
+    }
+  }
+};
+
+// 顯示資訊框
+const showTip = (chartType: string) => {
+  chartIsFreeze.value = "";
+  benefitTipState.value = false;
+  costTipState.value = false;
+  lossTipState.value = false;
   switch (chartType) {
     case "benefit":
-      if (benefitTipState.value) {
-        benefitTipState.value = false;
-        costTipState.value = false;
-        lossTipState.value = false;
-      } else {
-        if (benefitValue.value > 100000000000000000) {
-          tipIsEllipsis.value = true;
-        } else {
-          tipIsEllipsis.value = false;
-        }
-        benefitTipState.value = true;
-        costTipState.value = false;
-        lossTipState.value = false;
+      if (benefitValue.value > 100000000000000000) {
+        tipIsEllipsis.value = true;
       }
+      benefitTipState.value = true;
       break;
     case "cost":
-      if (costTipState.value) {
-        benefitTipState.value = false;
-        costTipState.value = false;
-        lossTipState.value = false;
-      } else {
-        if (costValue.value > 100000000000000000) {
-          tipIsEllipsis.value = true;
-        } else {
-          tipIsEllipsis.value = false;
-        }
-        benefitTipState.value = false;
-        costTipState.value = true;
-        lossTipState.value = false;
+      if (costValue.value > 100000000000000000) {
+        tipIsEllipsis.value = true;
       }
+      costTipState.value = true;
       break;
     case "loss":
-      if (lossTipState.value) {
-        benefitTipState.value = false;
-        costTipState.value = false;
-        lossTipState.value = false;
-      } else {
-        if (maxNegative.value < -100000000000000000) {
-          tipIsEllipsis.value = true;
-        } else {
-          tipIsEllipsis.value = false;
-        }
-        benefitTipState.value = false;
-        costTipState.value = false;
-        lossTipState.value = true;
+      if (maxNegative.value < -100000000000000000) {
+        tipIsEllipsis.value = true;
       }
+      lossTipState.value = true;
       break;
     default:
       break;
   }
 };
 
+// 隱藏資訊框
+const hideTip = (chartType: string) => {
+  if (chartIsFreeze.value !== chartType) {
+    benefitTipState.value = false;
+    costTipState.value = false;
+    lossTipState.value = false;
+    tipIsEllipsis.value = false;
+  }
+};
+
 // 數字轉成含逗號字串
 const separator = (numb: number) => {
-  const str = numb.toString().split(".");
-  str[0] = str[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-  return str.join(".");
+  // const str = numb.toString().split(".");
+  // str[0] = str[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  // return str.join(".");
+  return numb.toLocaleString("en-US");
 };
 
 onMounted(() => {
