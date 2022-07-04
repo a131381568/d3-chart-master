@@ -486,136 +486,155 @@ onMounted(() => {
   // getTipWidth();
 });
 </script>
-<style>
+<style lang="scss">
+// 定義共用變數
+$benefitMain: #1977ff;
+$costMain: #fa8903;
+$lossMain: #231fc0;
+$benefitSub: #b3d6ff;
+$costSub: #fdddb3;
+$lossSub: #bdbcec;
+$grayLight: #e7eaf2;
+$grayMiddle: #919eaa;
+$grayDark: #444;
+$white: #fff;
+$titleTextSize: 18px;
+$contentTextSize: 14px;
+$tipTextSize: 13px;
+// 巢狀樣式
 .card {
   width: auto;
   max-width: 325px;
   margin: 0 auto;
-  border: 1px solid #e7eaf2;
+  border: 1px solid $grayLight;
   padding: 20px;
   border-radius: 10px;
-}
-.card-title {
-  text-align: left;
-  color: #444;
-  font-size: 18px;
-  margin: 0;
-}
-.card-description {
-  text-align: left;
-  color: #919eaa;
-  font-size: 14px;
-  margin: 5px 0 0 0;
-}
-.benefit {
-  fill: #1977ff;
-}
-.loss {
-  fill: #231fc0;
-}
-.cost {
-  fill: #fa8903;
-}
-.svgboard-container {
-  /* resize: horizontal; */
-  overflow: visible;
-  width: 100%;
-  height: auto;
-  margin: 0 auto;
-  margin-top: 50px;
-}
-#svgboard {
-  overflow: visible;
-}
-#svgboard g > path {
-  cursor: pointer;
-}
-.scale-bar-text {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  text-align: right;
-}
-.scale-bar-text-box {
-  width: 60px;
-  height: 30px;
-}
-.top-tip-text-box {
-  /* width: calc(100% + 40px); */
-  width: 100%;
-  height: 32px;
-}
-
-.top-tip-text {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  text-align: center;
-  color: #fff;
-  font-size: 13px;
-  height: 32px;
-  line-height: 32px;
-  background: #444;
-  border-radius: 4px;
-  display: inline-block;
-  padding: 0 10px;
-}
-.tip-is-ellipsis .top-tip-text {
-  display: block;
-}
-.horizontal-line {
-  stroke: #c3cbd3;
-  stroke-width: 1px;
-}
-.tip-line {
-  stroke: #919eaa;
-  stroke-width: 1px;
-  stroke-dasharray: 4px;
-}
-.benefit.chart-freeze {
-  fill: #b3d6ff;
-}
-.cost.chart-freeze {
-  fill: #fdddb3;
-}
-.loss.chart-freeze {
-  fill: #bdbcec;
-}
-.top-tip-text-box.hide-item {
-  opacity: 1;
-}
-.top-tip-text-box {
-  opacity: 0;
-}
-.tag-list {
-  display: flex;
-  flex-wrap: wrap;
-  margin: 30px 0 10px 0;
-  justify-content: center;
-}
-.tag-name {
-  width: 160px;
-  font-size: 14px;
-  margin: 5px 0;
-  color: #444;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  cursor: pointer;
-}
-.benefit-tag,
-.loss-tag,
-.cost-tag {
-  width: 15px;
-  height: 15px;
-}
-.benefit-tag {
-  background: #1977ff;
-}
-.cost-tag {
-  background: #fa8903;
-}
-.loss-tag {
-  background: #231fc0;
+  .card-title {
+    text-align: left;
+    color: $grayDark;
+    font-size: $titleTextSize;
+    margin: 0;
+  }
+  .card-description {
+    text-align: left;
+    color: $grayMiddle;
+    font-size: $contentTextSize;
+    margin: 5px 0 0 0;
+  }
+  .svgboard-container {
+    /* resize: horizontal; */
+    overflow: visible;
+    width: 100%;
+    height: auto;
+    margin: 0 auto;
+    margin-top: 50px;
+    #svgboard {
+      overflow: visible;
+      // 長條圖
+      g {
+        path {
+          cursor: pointer;
+        }
+        .benefit {
+          fill: $benefitMain;
+          &.chart-freeze {
+            fill: $benefitSub;
+          }
+        }
+        .loss {
+          fill: $lossMain;
+          &.chart-freeze {
+            fill: $lossSub;
+          }
+        }
+        .cost {
+          fill: $costMain;
+          &.chart-freeze {
+            fill: $costSub;
+          }
+        }
+        .horizontal-line {
+          stroke: #c3cbd3;
+          stroke-width: 1px;
+        }
+      }
+      // 刻度
+      .scale-bar-text-box {
+        width: 60px;
+        height: 30px;
+        .scale-bar-text {
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+          text-align: right;
+        }
+      }
+      // 資訊框
+      .top-tip-text-box {
+        opacity: 0;
+        /* width: calc(100% + 40px); */
+        width: 100%;
+        height: 32px;
+        .top-tip-text {
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+          text-align: center;
+          color: $white;
+          font-size: $tipTextSize;
+          height: 32px;
+          line-height: 32px;
+          background: $grayDark;
+          border-radius: 4px;
+          display: inline-block;
+          padding: 0 10px;
+        }
+        &.tip-is-ellipsis {
+          .top-tip-text {
+            display: block;
+          }
+        }
+        &.hide-item {
+          opacity: 1;
+        }
+      }
+      // 虛線
+      .tip-line {
+        stroke: $grayMiddle;
+        stroke-width: 1px;
+        stroke-dasharray: 4px;
+      }
+    }
+    // 名稱標籤
+    .tag-list {
+      display: flex;
+      flex-wrap: wrap;
+      margin: 30px 0 10px 0;
+      justify-content: center;
+      .benefit-tag {
+        background: $benefitMain;
+      }
+      .cost-tag {
+        background: $costMain;
+      }
+      .loss-tag {
+        background: $lossMain;
+      }
+      .tag-name {
+        width: 160px;
+        font-size: $contentTextSize;
+        margin: 5px 0;
+        color: $grayDark;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+        & > span {
+          width: 15px;
+          height: 15px;
+        }
+      }
+    }
+  }
 }
 </style>
