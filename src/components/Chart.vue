@@ -160,10 +160,19 @@
       </div>
     </div>
   </div>
-  <div v-show="false">
-    <input v-model="benefitValue" type="number" />
-    <input v-model="costValue" type="number" />
-    <input v-model="maxNegative" type="number" />
+  <div class="input-dashboard">
+    <div class="input-group">
+      <h4>已實現獲利</h4>
+      <input v-model="benefitValue" type="number" />
+    </div>
+    <div class="input-group">
+      <h4>總交易成本</h4>
+      <input v-model="costValue" type="number" />
+    </div>
+    <div class="input-group">
+      <h4>已實現虧損</h4>
+      <input v-model="maxNegative" type="number" />
+    </div>
   </div>
 </template>
 <script setup lang="ts">
@@ -652,6 +661,28 @@ $tipTextSize: 13px;
           height: 15px;
         }
       }
+    }
+    // 使用者輸入介面
+  }
+}
+// 使用者輸入測試欄
+.input-dashboard {
+  width: auto;
+  max-width: 360px;
+  margin: 50px auto;
+  .input-group {
+    text-align: left;
+    h4 {
+      font-size: $contentTextSize;
+      margin: 5px 0;
+    }
+    input {
+      width: 100%;
+      border: 1px solid $grayLight;
+      margin-bottom: 10px;
+      padding: 5px;
+      outline: none;
+      box-shadow: none;
     }
   }
 }
