@@ -222,9 +222,9 @@ const getData = () => {
     title: "Phasellus sit amet",
     description:
       "Lorem ipsum dolor sit amet, curabitur adipiscing elit. Etiam sagittis porttitor nec vehicula.",
-    benefitVal: 37053700000000000,
-    costVal: 11680100000000000,
-    lossVal: -1,
+    benefitVal: 270537,
+    costVal: 216801,
+    lossVal: -33910,
   };
   // 輸入資料
   chartTitle.value = demoData.title;
@@ -456,10 +456,8 @@ const separator = (numb: number) => {
   return numb.toLocaleString("en-US");
 };
 
-onMounted(() => {
-  // 取得資料
-  getData();
-
+// 繪製圖表
+const drawChart = () => {
   // 繪製長條圖
   d3.select("#svgboard > g > .benefit").attr(
     "d",
@@ -481,9 +479,11 @@ onMounted(() => {
     .attr("y1", horizontalY.value)
     .attr("x2", width.value + leftScaleBar)
     .attr("y2", horizontalY.value);
+};
 
-  // 取得各資訊欄寬度
-  // getTipWidth();
+onMounted(() => {
+  getData();
+  drawChart();
 });
 </script>
 <style lang="scss">
