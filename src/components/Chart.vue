@@ -160,6 +160,11 @@
       </div>
     </div>
   </div>
+  <div>
+    <input v-model="benefitValue" type="number" />
+    <input v-model="costValue" type="number" />
+    <input v-model="maxNegative" type="number" />
+  </div>
 </template>
 <script setup lang="ts">
 import * as d3 from "d3";
@@ -180,9 +185,9 @@ const disPlayH = 200;
 const totalH = ref(500);
 const leftScaleBar = 90;
 const horizontalY = ref(0);
-const benefitTipX = ref(0);
-const costTipX = ref(0);
-const lossTipX = ref(0);
+// const benefitTipX = ref(0);
+// const costTipX = ref(0);
+// const lossTipX = ref(0);
 const maxY = ref(0);
 const minY = ref(10);
 const benefitTipState = ref(false);
@@ -192,39 +197,39 @@ const tipIsEllipsis = ref(false);
 const chartIsFreeze = ref("");
 
 // 取得當下資訊框端度
-const getTipWidth = () => {
-  setTimeout(() => {
-    const benefitDOM = document.querySelector(
-      ".benefit-top-tip-text"
-    ) as HTMLElement | null;
-    const costDOM = document.querySelector(
-      ".cost-top-tip-text"
-    ) as HTMLElement | null;
-    const lossDOM = document.querySelector(
-      ".loss-top-tip-text"
-    ) as HTMLElement | null;
-    if (benefitDOM !== null) {
-      benefitTipX.value = benefitDOM.offsetWidth;
-    }
-    if (costDOM !== null) {
-      costTipX.value = costDOM.offsetWidth;
-    }
-    if (lossDOM !== null) {
-      lossTipX.value = lossDOM.offsetWidth;
-    }
-  }, 500);
-};
+// const getTipWidth = () => {
+//   setTimeout(() => {
+//     const benefitDOM = document.querySelector(
+//       ".benefit-top-tip-text"
+//     ) as HTMLElement | null;
+//     const costDOM = document.querySelector(
+//       ".cost-top-tip-text"
+//     ) as HTMLElement | null;
+//     const lossDOM = document.querySelector(
+//       ".loss-top-tip-text"
+//     ) as HTMLElement | null;
+//     if (benefitDOM !== null) {
+//       benefitTipX.value = benefitDOM.offsetWidth;
+//     }
+//     if (costDOM !== null) {
+//       costTipX.value = costDOM.offsetWidth;
+//     }
+//     if (lossDOM !== null) {
+//       lossTipX.value = lossDOM.offsetWidth;
+//     }
+//   }, 500);
+// };
 
 // 取得資料
-const getData = () => {
+const getData = (benefitNum: number, costNum: number, lossNum: number) => {
   // 假資料
   const demoData: chartData = {
     title: "Phasellus sit amet",
     description:
       "Lorem ipsum dolor sit amet, curabitur adipiscing elit. Etiam sagittis porttitor nec vehicula.",
-    benefitVal: 270537,
-    costVal: 216801,
-    lossVal: -33910,
+    benefitVal: benefitNum,
+    costVal: costNum,
+    lossVal: lossNum,
   };
   // 輸入資料
   chartTitle.value = demoData.title;
@@ -332,7 +337,7 @@ const drawRect = (chartType: string, val: number) => {
   let bl = 0;
   let br = 0;
 
-  if (val < 0) {
+  if (chartType === "loss") {
     tl = 0;
     tr = 0;
     bl = rectRadius;
@@ -341,12 +346,20 @@ const drawRect = (chartType: string, val: number) => {
     y = height.value - height.value * (Math.abs(val) / totalH.value);
     x = order * rectStep - w + leftScaleBar;
     // 儲存最小的顯示高度
-    if (h > minY.value) {
-      minY.value = h;
-    }
+    // if (h > minY.value) {
+    // console.log("儲存最小的顯示高度: ", h);
+    minY.value = h;
+    // }
   } else {
     // 儲存最大的顯示高度
-    if (h > maxY.value) {
+    // if (h > maxY.value) {
+    //   // console.log("儲存最大的顯示高度: ", h);
+    //   maxY.value = h;
+    // }
+    if (benefitValue.value > costValue.value && chartType === "benefit") {
+      maxY.value = h;
+    }
+    if (costValue.value > benefitValue.value && chartType === "cost") {
       maxY.value = h;
     }
   }
@@ -480,10 +493,16 @@ const drawChart = () => {
     .attr("x2", width.value + leftScaleBar)
     .attr("y2", horizontalY.value);
 };
-
 onMounted(() => {
-  getData();
-  drawChart();
+  //-33910
+  getData(270537, 216801, -33);
+  // drawChart();
+});
+
+// 監聽後更新
+watch([benefitValue, costValue, maxNegative], async (newVal, oldVal) => {
+  await getData(...newVal);
+  await drawChart();
 });
 </script>
 <style lang="scss">
