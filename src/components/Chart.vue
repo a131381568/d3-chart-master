@@ -17,7 +17,9 @@
           :x="chartX1"
           y="-48"
         >
-          <div class="top-tip-text">已實現獲利 ${{ benefitValue }}</div>
+          <div class="top-tip-text">
+            已實現獲利 ${{ separator(benefitValue) }}
+          </div>
         </foreignObject>
         <foreignObject
           v-show="lossTipState"
@@ -25,7 +27,9 @@
           :x="chartX1"
           y="-48"
         >
-          <div class="top-tip-text">已實現虧損 ${{ maxNegative }}</div>
+          <div class="top-tip-text">
+            已實現虧損 ${{ separator(maxNegative) }}
+          </div>
         </foreignObject>
         <foreignObject
           v-show="costTipState"
@@ -33,7 +37,7 @@
           :x="chartX2"
           y="-48"
         >
-          <div class="top-tip-text">總交易成本 ${{ costValue }}</div>
+          <div class="top-tip-text">總交易成本 ${{ separator(costValue) }}</div>
         </foreignObject>
         <!-- 刻度 -->
         <foreignObject
@@ -55,12 +59,63 @@
         >
           <div class="scale-bar-text">{{ outPutMinVal }}</div>
         </foreignObject>
+        <!-- 圖表 -->
         <g>
-          <path class="benefit" @click.prevent="toggleTip('benefit')"></path>
-          <path class="cost" @click.prevent="toggleTip('cost')"></path>
-          <path class="loss" @click.prevent="toggleTip('loss')"></path>
-          <line stroke-width="1"></line>
+          <path
+            :class="[
+              'benefit',
+              { 'chart-active': benefitTipState },
+              { 'chart-freeze': costTipState || lossTipState },
+            ]"
+            @click.prevent="toggleTip('benefit')"
+          ></path>
+          <path
+            :class="[
+              'cost',
+              { 'chart-active': costTipState },
+              { 'chart-freeze': benefitTipState || lossTipState },
+            ]"
+            @click.prevent="toggleTip('cost')"
+          ></path>
+          <path
+            :class="[
+              'loss',
+              { 'chart-active': lossTipState },
+              { 'chart-freeze': benefitTipState || costTipState },
+            ]"
+            @click.prevent="toggleTip('loss')"
+          ></path>
+          <line class="horizontal-line"></line>
         </g>
+        <!-- 虛線 -->
+        <line
+          v-show="benefitTipState"
+          class="benefit-line tip-line"
+          :x1="2 * leftScaleBar - rectWidth + rectWidth / 2"
+          y1="-16"
+          :x2="2 * leftScaleBar - rectWidth + rectWidth / 2"
+          y2="0"
+        />
+        <line
+          v-show="costTipState"
+          class="cost-line tip-line"
+          :x1="3 * leftScaleBar - rectWidth + rectWidth / 2"
+          y1="-16"
+          :x2="3 * leftScaleBar - rectWidth + rectWidth / 2"
+          :y2="
+            height -
+            height * (costValue / totalH) +
+            height * (maxNegative / totalH)
+          "
+        />
+        <line
+          v-show="lossTipState"
+          class="loss-line tip-line"
+          :x1="2 * leftScaleBar - rectWidth + rectWidth / 2"
+          y1="-16"
+          :x2="2 * leftScaleBar - rectWidth + rectWidth / 2"
+          :y2="height * (benefitValue / totalH)"
+        />
       </svg>
     </div>
   </div>
@@ -319,6 +374,13 @@ const toggleTip = (chartType: string) => {
   }
 };
 
+// 數字轉成含逗號字串
+const separator = (numb: number) => {
+  const str = numb.toString().split(".");
+  str[0] = str[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  return str.join(".");
+};
+
 onMounted(() => {
   // 取得資料
   getData();
@@ -340,7 +402,6 @@ onMounted(() => {
   // 繪製水平線
   const drawLine = d3.select("#svgboard > g > line");
   drawLine
-    .attr("stroke", "#ccc")
     .attr("x1", 0 + +leftScaleBar)
     .attr("y1", horizontalY.value)
     .attr("x2", width.value + leftScaleBar)
@@ -382,7 +443,7 @@ onMounted(() => {
   height: 30px;
 }
 .top-tip-text-box {
-  width: calc(100% + 20px);
+  width: calc(100% + 40px);
   height: 32px;
 }
 
@@ -402,5 +463,23 @@ onMounted(() => {
 }
 .tip-is-ellipsis .top-tip-text {
   display: block;
+}
+.horizontal-line {
+  stroke: #c3cbd3;
+  stroke-width: 1px;
+}
+.tip-line {
+  stroke: #919eaa;
+  stroke-width: 1px;
+  stroke-dasharray: 4px;
+}
+.benefit.chart-freeze {
+  fill: #b3d6ff;
+}
+.cost.chart-freeze {
+  fill: #fdddb3;
+}
+.loss.chart-freeze {
+  fill: #bdbcec;
 }
 </style>
