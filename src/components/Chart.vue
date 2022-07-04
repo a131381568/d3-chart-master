@@ -160,7 +160,7 @@
       </div>
     </div>
   </div>
-  <div>
+  <div v-show="false">
     <input v-model="benefitValue" type="number" />
     <input v-model="costValue" type="number" />
     <input v-model="maxNegative" type="number" />
@@ -494,8 +494,7 @@ const drawChart = () => {
     .attr("y2", horizontalY.value);
 };
 onMounted(() => {
-  //-33910
-  getData(270537, 216801, -33);
+  getData(270537, 216801, -33910);
   // drawChart();
 });
 

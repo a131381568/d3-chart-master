@@ -1,7 +1,5 @@
 import { createRouter, createWebHistory } from "vue-router";
-
 import Index from "@/pages/Index.vue";
-import About from "@/pages/About.vue";
 
 const routes = [
   {
@@ -10,14 +8,6 @@ const routes = [
     component: Index,
     meta: {
       title: "首頁",
-    },
-  },
-  {
-    name: "About",
-    path: "/about",
-    component: About,
-    meta: {
-      title: "關於",
     },
   },
 ];
