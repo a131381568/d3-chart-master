@@ -1,7 +1,5 @@
 # D3 Chart DEMO
 
-DEMO 網址: https://dev.puraliena.com/
-
 > 此長條圖建置邏輯都在`Chart.vue`，這個 component 裡面完成。
 
 ## 一、顯示狀態與互動
